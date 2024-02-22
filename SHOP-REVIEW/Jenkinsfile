@@ -18,7 +18,7 @@ pipeline {
         stage('Building  image SHOP-REVIEW') {
             steps {
                 script {
-                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${DOCKERFILE_FOLDER}/Dockerfile .")
+                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${TAG}/Dockerfile .")
                     // Additional build steps if needed
                 }
             }

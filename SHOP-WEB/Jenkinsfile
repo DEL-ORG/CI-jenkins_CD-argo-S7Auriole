@@ -5,6 +5,7 @@ pipeline {
         DOCKER_REGISTRY = 'https://index.docker.io/v1/'
         DOCKERHUB_CREDENTIALS = 'dockerhub'   //should match the credential name in Jenkins
         TAG = 'SHOP-WEB'
+        
   
        
     }
@@ -19,7 +20,7 @@ pipeline {
         stage('Building  image SHOP-WEB') {
             steps {
                 script {
-                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${DOCKERFILE_FOLDER}/Dockerfile .")
+                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${TAG}/Dockerfile .")
                     // Additional build steps if needed
                 }
             }
