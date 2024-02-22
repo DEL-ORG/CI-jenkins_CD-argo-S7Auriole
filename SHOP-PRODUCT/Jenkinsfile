@@ -3,48 +3,50 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'https://index.docker.io/v1/'
-        DOCKERHUB_CREDENTIALS = 'dockerhub'
-        SERVICE_NAME = 'web'
+        DOCKERHUB_CREDENTIALS = 'dockerhub'   //should match the credential name in Jenkins
+        TAG = 'SHOP-PRODUCT'
+  
+       
     }
 
     stages {
-        stage('Clone repository') {
+        stage('Cloning CI-SHOP-PRODUCT repo') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build image') {
+        stage('Building  image SHOP-PRODUCT') {
             steps {
                 script {
-                    def shopWeb = docker.build("attamegnon/attamegnon2022:web_v0.0${env.BUILD_NUMBER}", "-f SHOP-PRODUCT/Dockerfile .")
+                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${DOCKERFILE_FOLDER}/Dockerfile .")
                     // Additional build steps if needed
                 }
             }
         }
 
-        stage('Push image to DockerHub and remove local image') {
+        stage('Pushing image SHOP-PRODUCT with tag to DockerHub and remove local image') {
             steps {
                 script {
                     docker.withRegistry(DOCKER_REGISTRY, DOCKERHUB_CREDENTIALS) {
-                        sh "docker push attamegnon/attamegnon2022:web_v0.0${env.BUILD_NUMBER}"
+                        echo "Pushing image with TAG ${TAG}_v0.0${env.BUILD_NUMBER} to DockerHub"
+                        sh "docker push attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}"
                         sh "docker images"
-                        sh "docker rmi -f attamegnon/attamegnon2022:web_v0.0${env.BUILD_NUMBER}"
+                        sh "docker rmi -f attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}"
                         sh "docker images"
                     }
                 }
             }
         }
 
-        stage('Trigger ManifestUpdate') {
+        stage('Triggering CD-SHOP-PRODUCT-ManifestUpdate') {
             steps {
                 script {
-                    def web = "web_v0.0${env.BUILD_NUMBER}"
-                    echo "Triggering updatemanifestjob with DOCKERTAG=${web}"
-                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: "${web}")]
+                    FUNCTION = "${TAG}_v0.0${env.BUILD_NUMBER}"
+                    echo "Triggering updatemanifestjob with DOCKERTAG=${FUNCTION}"
+                    build job: 'SHOP-PRODUCT', parameters: [string(name: 'DOCKERTAG', value: "${FUNCTION}")]
                 }
             }
         }
     }
 }
-

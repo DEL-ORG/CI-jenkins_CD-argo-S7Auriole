@@ -1,30 +1,51 @@
-node {
-    def shop-review
-    def review
+pipeline {
+    agent any
 
-    stage('Clone repository') {
-        checkout scm
+    environment {
+        DOCKER_REGISTRY = 'https://index.docker.io/v1/'
+        DOCKERHUB_CREDENTIALS = 'dockerhub'   //should match the credential name in Jenkins
+        TAG = 'SHOP-REVIEW'
+       
     }
 
-    stage('Build image') {
-        shop-review = docker.build("attamegnon/attamegnon2022")
-    }
-
-    stage('Test image') {
-        shop-review.inside {
-            sh 'echo "Tests passed"'
+    stages {
+        stage('Cloning CI-SHOP-REVIEW repo') {
+            steps {
+                checkout scm
+            }
         }
-    }
 
-    stage('Push image') {
-        review = "review${env.BUILD_NUMBER}"
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            shop-review.push("${review}")
+        stage('Building  image SHOP-REVIEW') {
+            steps {
+                script {
+                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${DOCKERFILE_FOLDER}/Dockerfile .")
+                    // Additional build steps if needed
+                }
+            }
         }
-    }
 
-    stage('Trigger ManifestUpdate') {
-        echo "triggering updatemanifestjob"
-        build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: "${review}")]
+        stage('Pushing image SHOP-REVIEW with tag to DockerHub and remove local image') {
+            steps {
+                script {
+                    docker.withRegistry(DOCKER_REGISTRY, DOCKERHUB_CREDENTIALS) {
+                        echo "Pushing image with TAG ${TAG}_v0.0${env.BUILD_NUMBER} to DockerHub"
+                        sh "docker push attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}"
+                        sh "docker images"
+                        sh "docker rmi -f attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}"
+                        sh "docker images"
+                    }
+                }
+            }
+        }
+
+        stage('Triggering CD-SHOP-REVIEW-ManifestUpdate') {
+            steps {
+                script {
+                    FUNCTION = "${TAG}_v0.0${env.BUILD_NUMBER}"
+                    echo "Triggering updatemanifestjob with DOCKERTAG=${FUNCTION}"
+                    build job: 'SHOP-REVIEW', parameters: [string(name: 'DOCKERTAG', value: "${FUNCTION}")]
+                }
+            }
+        }
     }
 }
