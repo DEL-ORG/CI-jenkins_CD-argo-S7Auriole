@@ -1,12 +1,12 @@
 node {
 
-    stage('Cloning CD-SHOP-WEB repo') {
+    stage('Cloning CD-SHOP-REVIEW repo') {
       
 
         checkout scm
     }
 
-    stage('Updating SHOP-WEB value.yaml in CD branch') {
+    stage('Updating SHOP-REVIEW value.yaml in CD branch') {
             script {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     // fetching these credential from the jenkins credential that i set up in jenkins. the password is the token i generated in github
@@ -15,16 +15,16 @@ node {
                         sh "git config user.email attamegnon@gmail.com"
                         sh "git config user.name s7testar"
                         sh "git switch CD"
-                        sh "cd SHOP-WEB"
-                        sh "cat SHOP-WEB/values.yaml"
-                        sh "sed -i 's+tag:.*+tag: \"${DOCKERTAG}\"+g' SHOP-WEB/values.yaml"
+                        sh "cd SHOP-REVIEW"
+                        sh "cat SHOP-REVIEW/values.yaml"
+                        sh "sed -i 's+tag:.*+tag: \"${DOCKERTAG}\"+g' SHOP-REVIEW/values.yaml"
                      // sh "sed -i 's+attamegnon/attamegnon2022.*+attamegnon/attamegnon2022:${DOCKERTAG}+g' values.yaml" 
-                        sh "cat SHOP-WEB/values.yaml"
+                        sh "cat SHOP-REVIEW/values.yaml"
                         sh "cd .."  
                         sh "git config pull.rebase false"
                         sh "git pull --all" 
                         sh "git add ."
-                        sh "git commit -m 'Done by Jenkins Job update SHOP-WEB value.yaml: ${env.BUILD_NUMBER}'"
+                        sh "git commit -m 'Done by Jenkins Job update SHOP-REVIEW value.yaml: ${env.BUILD_NUMBER}'"
                         sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/DEL-ORG/CI-jenkins_CD-argo-S7Auriole.git HEAD:CD"
       }
     }
