@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: attamegnon/attamegnon2022
   pullPolicy: Always
-  tag: "latest"
+  tag: "SHOP-PRODUCT_v0.02"
 
 imagePullSecrets:
 - name: imagepull-secret
