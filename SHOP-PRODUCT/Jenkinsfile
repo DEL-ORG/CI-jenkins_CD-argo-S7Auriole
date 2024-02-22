@@ -4,9 +4,7 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'https://index.docker.io/v1/'
         DOCKERHUB_CREDENTIALS = 'dockerhub'
-        TAG = 'web'
-  
-       
+        SERVICE_NAME = 'web'
     }
 
     stages {
@@ -19,7 +17,7 @@ pipeline {
         stage('Build image') {
             steps {
                 script {
-                    docker.build("attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}", "-f ${DOCKERFILE_FOLDER}/Dockerfile .")
+                    def shopWeb = docker.build("attamegnon/attamegnon2022:web_v0.0${env.BUILD_NUMBER}", "-f SHOP-PRODUCT/Dockerfile .")
                     // Additional build steps if needed
                 }
             }
@@ -29,9 +27,9 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry(DOCKER_REGISTRY, DOCKERHUB_CREDENTIALS) {
-                        sh "docker push attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}"
+                        sh "docker push attamegnon/attamegnon2022:web_v0.0${env.BUILD_NUMBER}"
                         sh "docker images"
-                        sh "docker rmi -f attamegnon/attamegnon2022:${TAG}_v0.0${env.BUILD_NUMBER}"
+                        sh "docker rmi -f attamegnon/attamegnon2022:web_v0.0${env.BUILD_NUMBER}"
                         sh "docker images"
                     }
                 }
@@ -41,11 +39,12 @@ pipeline {
         stage('Trigger ManifestUpdate') {
             steps {
                 script {
-                    FUNCTION = "${TAG}_v0.0${env.BUILD_NUMBER}"
-                    echo "Triggering updatemanifestjob with DOCKERTAG=${FUNCTION}"
-                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: "${FUNCTION}")]
+                    def web = "web_v0.0${env.BUILD_NUMBER}"
+                    echo "Triggering updatemanifestjob with DOCKERTAG=${web}"
+                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: "${web}")]
                 }
             }
         }
     }
 }
+

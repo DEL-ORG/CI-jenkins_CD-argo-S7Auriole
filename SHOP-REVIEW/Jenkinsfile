@@ -1,0 +1,30 @@
+node {
+    def shop-review
+    def review
+
+    stage('Clone repository') {
+        checkout scm
+    }
+
+    stage('Build image') {
+        shop-review = docker.build("attamegnon/attamegnon2022")
+    }
+
+    stage('Test image') {
+        shop-review.inside {
+            sh 'echo "Tests passed"'
+        }
+    }
+
+    stage('Push image') {
+        review = "review${env.BUILD_NUMBER}"
+        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+            shop-review.push("${review}")
+        }
+    }
+
+    stage('Trigger ManifestUpdate') {
+        echo "triggering updatemanifestjob"
+        build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: "${review}")]
+    }
+}
