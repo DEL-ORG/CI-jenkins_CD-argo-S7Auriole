@@ -1,0 +1,34 @@
+node {
+    def shopWeb
+
+    stage('Clone repository') {
+      
+
+        checkout scm
+    }
+
+    stage('Update GIT') {
+            script {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    // fetching these credential from the jenkins credential that i set up in jenkins. the password is the token i generated in github
+                    withCredentials([usernamePassword(credentialsId: 'github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        //def encodedPassword = URLEncoder.encode("$GIT_PASSWORD",'UTF-8')
+                        sh "git config user.email attamegnon@gmail.com"
+                        sh "git config user.name s7testar"
+                        sh "git switch kubernetes-manifest"
+                        sh "cd SHOP-WEB"
+                        sh "cat SHOP-WEB/values.yaml"
+                        sh "sed -i 's+tag:.*+tag: \"${DOCKERTAG}\"+g' SHOP-WEB/values.yaml"
+                     // sh "sed -i 's+attamegnon/attamegnon2022.*+attamegnon/attamegnon2022:${DOCKERTAG}+g' values.yaml" 
+                        sh "cat SHOP-WEB/values.yaml"
+                        sh "cd .."  
+                        sh "git config pull.rebase false"
+                        sh "git pull --all" 
+                        sh "git add ."
+                        sh "git commit -m 'Done by Jenkins Job changemanifest: ${env.BUILD_NUMBER}'"
+                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/DEL-ORG/CI-jenkins_CD-argo-S7Auriole.git HEAD:kubernetes-manifest"
+      }
+    }
+  }
+}
+}
