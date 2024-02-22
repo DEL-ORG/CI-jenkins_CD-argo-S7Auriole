@@ -14,7 +14,7 @@ node {
                         //def encodedPassword = URLEncoder.encode("$GIT_PASSWORD",'UTF-8')
                         sh "git config user.email attamegnon@gmail.com"
                         sh "git config user.name s7testar"
-                        sh "git switch kubernetes-manifest"
+                        sh "git switch CD"
                         sh "cd SHOP-WEB"
                         sh "cat SHOP-WEB/values.yaml"
                         sh "sed -i 's+tag:.*+tag: \"${DOCKERTAG}\"+g' SHOP-WEB/values.yaml"
