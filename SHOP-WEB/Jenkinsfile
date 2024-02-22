@@ -6,7 +6,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = 'dockerhub'
         TAG = 'web'
         DOCKERFILE_FOLDER = 'SHOP-WEB'
-        FUNCTION = 'def shop-web'   // Name of the function in line  45
+       
     }
 
     stages {
